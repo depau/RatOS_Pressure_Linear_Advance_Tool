@@ -1590,7 +1590,7 @@ function toggleFirmwareOptions(){
       $("label[for=TOOL_INDEX").parent().hide();
       $("#TOOL_INDEX").parent().hide();
       if ($("#EXPERT_MODE").is(":checked")) {
-        $("label[for=EXTRUDER_NAME").parent().show();
+        $("label[for=EXTRUDER_NAME]").parent().show();
         $("#EXTRUDER_NAME").parent().show();
         $("label[for=PA_SMOOTH]").parent().css({ opacity: 1 });
         $("#PA_SMOOTH").parent().css({ opacity: 1 });
@@ -1610,7 +1610,7 @@ Once you find a general range, run again with narrower range / finer increment.<
         $("label[for=TOOL_INDEX").parent().show();
         $("#TOOL_INDEX").parent().show();
       }
-      $("label[for=EXTRUDER_NAME").parent().hide();
+      $("label[for=EXTRUDER_NAME]").parent().hide();
       $("#EXTRUDER_NAME").parent().hide();
       $("#STEPPING_HEADER").html("Linear Advance Stepping");
       $("#STEPPING_HEADER_BODY").html(`\
@@ -1629,7 +1629,7 @@ Once you find a general range, run again with narrower range / finer increment.<
         $("label[for=TOOL_INDEX").parent().show();
         $("#TOOL_INDEX").parent().show();
       }
-      $("label[for=EXTRUDER_NAME").parent().hide();
+      $("label[for=EXTRUDER_NAME]").parent().hide();
       $("#EXTRUDER_NAME").parent().hide();
       $("#STEPPING_HEADER").html("Linear Advance Stepping");
       $("#STEPPING_HEADER_BODY").html(``);
@@ -1644,7 +1644,7 @@ Once you find a general range, run again with narrower range / finer increment.<
         $("label[for=TOOL_INDEX").parent().show();
         $("#TOOL_INDEX").parent().show();
       }
-      $("label[for=EXTRUDER_NAME").parent().hide();
+      $("label[for=EXTRUDER_NAME]").parent().hide();
       $("#EXTRUDER_NAME").parent().hide();
       $("#STEPPING_HEADER").html("Pressure Advance Stepping");
       $("#STEPPING_HEADER_BODY").html(`\
