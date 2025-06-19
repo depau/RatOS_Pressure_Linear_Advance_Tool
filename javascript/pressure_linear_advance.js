@@ -290,7 +290,7 @@ const Settings = {
     gcode = gcode.replace(/M190 S0.*?\n/g, "");
 
     // Add M109 / M190 if user didn't add & didn't opt out
-    if (!config.start_gcode_no_heating) {
+    if (!config.startGcodeNoHeating()) {
       if (!gcode.match(/\[HOTEND_TEMP\]/g)) {
         if (!gcode.match(/G28(?! Z)/gm)) {
           // If user does not have a G28
@@ -316,7 +316,7 @@ const Settings = {
     }
 
     // Prepend G28 if user didn't add & didn't opt out
-    if (!config.start_gcode_no_homing) {
+    if (!config.startGcodeNoHoming()) {
       if (!gcode.match(/G28(?! Z)/gm)) {
         gcode = `G28 ; Home all axes\n${gcode}`;
       }
@@ -683,6 +683,16 @@ const Settings = {
       Math.abs(this.printSizeY() * Math.cos(toRadians(this.printDir())))
     );
   },
+  startGcodeNoHoming() {
+    if (this.firmware !== 'ratos')
+      return this.start_gcode_no_homing;
+    return true;
+  },
+  startGcodeNoHeating() {
+    if (this.firmware !== 'ratos')
+      return this.start_gcode_no_heating;
+    return true;
+  },
 };
 
 const DEFAULT_SETTINGS = Object.create(Settings);
@@ -799,8 +809,8 @@ ${(config.expert_mode ? `${(config.useLineNo() ? `;  - No Leading Zeroes: ${conf
 ; Start / End G-code:
 ;  - Hotend Temp: ${config.hotend_temp}C
 ;  - Bed Temp: ${config.bed_temp}C
-;  - Don't Add G28: ${config.start_gcode_no_homing}
-;  - Don't Add Heating G-Codes: ${config.start_gcode_no_heating}
+;  - Don't Add G28: ${config.startGcodeNoHoming()}
+;  - Don't Add Heating G-Codes: ${config.startGcodeNoHeating()}
 ;  - Entered Start G-code: 
 ${config.startGCode(true).replace(/^/gm, ";       ")}
 ;  - Entered End G-code: 
@@ -1612,6 +1622,10 @@ function toggleFirmwareOptions(){
         $("label[for=PA_SMOOTH]").parent().css({ opacity: 1 });
         $("#PA_SMOOTH").parent().css({ opacity: 1 });
       }
+      $("label[for=START_GCODE_NO_HEATING]").parent().show();
+      $("#START_GCODE_NO_HEATING").parent().show();
+      $("label[for=START_GCODE_NO_HOMING]").parent().show();
+      $("#START_GCODE_NO_HOMING").parent().show();
       $("#STEPPING_HEADER").html("Pressure Advance Stepping");
       $("#STEPPING_HEADER_BODY").html(`\
 <i>Direct Drive: Start with ~0 to ~0.08 @ 0.005 increment<br>
@@ -1629,6 +1643,10 @@ Once you find a general range, run again with narrower range / finer increment.<
       }
       $("label[for=EXTRUDER_NAME]").parent().hide();
       $("#EXTRUDER_NAME").parent().hide();
+      $("label[for=START_GCODE_NO_HEATING]").parent().hide();
+      $("#START_GCODE_NO_HEATING").parent().hide();
+      $("label[for=START_GCODE_NO_HOMING]").parent().hide();
+      $("#START_GCODE_NO_HOMING").parent().hide();
       $("#STEPPING_HEADER").html("Pressure Advance Stepping");
       $("#STEPPING_HEADER_BODY").html(`\
 <i>Direct Drive: Start with ~0 to ~0.08 @ 0.005 increment<br>
@@ -1665,6 +1683,10 @@ Once you find a general range, run again with narrower range / finer increment.<
       }
       $("label[for=EXTRUDER_NAME]").parent().hide();
       $("#EXTRUDER_NAME").parent().hide();
+      $("label[for=START_GCODE_NO_HEATING]").parent().show();
+      $("#START_GCODE_NO_HEATING").parent().show();
+      $("label[for=START_GCODE_NO_HOMING]").parent().show();
+      $("#START_GCODE_NO_HOMING").parent().show();
       $("#STEPPING_HEADER").html("Linear Advance Stepping");
       $("#STEPPING_HEADER_BODY").html(``);
       $("label[for=PA_START]").html("Start K Value");
@@ -1680,6 +1702,10 @@ Once you find a general range, run again with narrower range / finer increment.<
       }
       $("label[for=EXTRUDER_NAME]").parent().hide();
       $("#EXTRUDER_NAME").parent().hide();
+      $("label[for=START_GCODE_NO_HEATING]").parent().show();
+      $("#START_GCODE_NO_HEATING").parent().show();
+      $("label[for=START_GCODE_NO_HOMING]").parent().show();
+      $("#START_GCODE_NO_HOMING").parent().show();
       $("#STEPPING_HEADER").html("Pressure Advance Stepping");
       $("#STEPPING_HEADER_BODY").html(`\
 <i>Direct Drive: Start with ~0 to ~0.08 @ 0.005 increment<br>
