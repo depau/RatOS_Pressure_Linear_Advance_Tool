@@ -322,6 +322,11 @@ const Settings = {
         .replace(/\[BED_TEMP\]/g, this.bed_temp)
         .replace(/\[EXTRUDER_NAME\]/g, this.extruder_name)
         .replace(/\[TOOL_INDEX\]/g, this.tool_index)
+        .replace(/\[MIN_X\]/g, this.bedX() / 2 - this.objectSizeX() / 2)
+        .replace(/\[MIN_Y\]/g, this.bedY() / 2 - this.objectSizeY() / 2)
+        .replace(/\[MAX_X\]/g, this.bedX() / 2 + this.objectSizeX() / 2)
+        .replace(/\[MAX_Y\]/g, this.bedY() / 2 + this.objectSizeY() / 2)
+        .replace(/\[TOTAL_LAYER_COUNT\]/g, this.numLayers())
 
         // PS / SS native variables
         .replace(/{first_layer_temperature.*?}/g, this.hotend_temp)
