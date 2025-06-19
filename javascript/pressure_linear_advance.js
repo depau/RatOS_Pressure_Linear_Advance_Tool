@@ -42,6 +42,12 @@ const START_GCODES = {
     PRINT_START ; Start macro
     ; START_PRINT ; Start macro (alternate / official start macro name)
   `,
+  ratos: `
+    START_PRINT EXTRUDER_TEMP=[HOTEND_TEMP] EXTRUDER_OTHER_LAYER_TEMP=[HOTEND_TEMP] BED_TEMP=[BED_TEMP] TOTAL_LAYER_COUNT=[TOTAL_LAYER_COUNT] X0=[MIN_X] Y0=[MIN_Y] X1=[MAX_X] Y1=[MAX_Y]
+
+    ; For IDEX printers
+    ; START_PRINT EXTRUDER_TEMP=[HOTEND_TEMP],[HOTEND_TEMP] EXTRUDER_OTHER_LAYER_TEMP=[HOTEND_TEMP],[HOTEND_TEMP] BED_TEMP=[BED_TEMP] INITIAL_TOOL=[TOOL_INDEX] TOTAL_LAYER_COUNT=[TOTAL_LAYER_COUNT] X0=[MIN_X] Y0=[MIN_Y] X1=[MAX_X] Y1=[MAX_Y]
+  `,
   rrf3: `
     G28                 ; Home all axes
     G90                 ; Absolute XYZ
@@ -71,6 +77,7 @@ const START_GCODES = {
 
 const END_GCODES = {
   klipper: `PRINT_END ; End macro. Change name to match yours`,
+  ratos: `END_PRINT`,
   rrf3: `M0 ; Stop`,
   marlin1_1_9: `M501 ; Load settings from EEPROM (to restore previous values)`,
   marlin1_1_8: `M501 ; Load settings from EEPROM (to restore previous values)`,
@@ -777,10 +784,10 @@ ${(config.expert_mode ? `;  - Corner Angle: ${config.cornerAngle()} degrees \n` 
 ${(config.expert_mode ? `;  - Printing Direction: ${config.printDir()} degree\n` : '')}\
 ${(config.expert_mode ? ';\n' : '')}\
 ; Pressure Advance Stepping:
-;  - ${(config.firmware == 'klipper' || config.firmware == 'rrf3' ? 'PA' : 'LA')} Start Value: ${Math.round10(config.pa_start, PA_round)}
-;  - ${(config.firmware == 'klipper' || config.firmware == 'rrf3' ? 'PA' : 'LA')} End Value: ${config.pa_end}
-;  - ${(config.firmware == 'klipper' || config.firmware == 'rrf3' ? 'PA' : 'LA')} Increment: ${config.pa_step}
-${(config.expert_mode && config.firmware == 'klipper' ? `;  - Increment Smooth Time Instead: ${config.paSmooth()}\n` : '')}\
+;  - ${(config.firmware == 'klipper' || config.firmware == 'ratos' || config.firmware == 'rrf3' ? 'PA' : 'LA')} Start Value: ${Math.round10(config.pa_start, PA_round)}
+;  - ${(config.firmware == 'klipper' || config.firmware == 'ratos' || config.firmware == 'rrf3' ? 'PA' : 'LA')} End Value: ${config.pa_end}
+;  - ${(config.firmware == 'klipper' || config.firmware == 'ratos' || config.firmware == 'rrf3' ? 'PA' : 'LA')} Increment: ${config.pa_step}
+${(config.expert_mode && (config.firmware == 'klipper' || config.firmware == 'ratos') ? `;  - Increment Smooth Time Instead: ${config.paSmooth()}\n` : '')}\
 ${(config.expert_mode ? `;  - Show on LCD: ${config.showLcd()}\n` : '')}\
 ${(config.expert_mode ? `;  - Number Tab: ${config.useLineNo()}\n` : '')}\
 ${(config.expert_mode ? `${(config.useLineNo() ? `;  - No Leading Zeroes: ${config.lineNoNoLeadingZero()}\n`: '')}` : '')}\
@@ -799,7 +806,7 @@ ${config.endGCode().replace(/^/gm, ";       ")}
 ;  - Print Size X: ${Math.round10(config.fitWidth(), -2)} mm
 ;  - Print Size Y: ${Math.round10(config.fitHeight(), -2)} mm
 ;  - Number of Patterns to Print: ${config.numPatterns()}
-;  - ${(config.firmware == 'klipper' || config.firmware == 'rrf3' ? 'PA' : 'LA')} Values: `;
+;  - ${(config.firmware == 'klipper' || config.firmware == 'ratos' || config.firmware == 'rrf3' ? 'PA' : 'LA')} Values: `;
 
 for (let i = 0; i < config.numPatterns(); i++){
   state.pa_script += Math.round10((config.pa_start + i * config.pa_step),PA_round);
@@ -816,8 +823,9 @@ state.pa_script += `\
 ; Prepare printing
 ;
 ${(config.firmware == 'klipper' && config.extruder_name !== '' && config.extruder_name_enable ? `ACTIVATE_EXTRUDER EXTRUDER=${config.extruder_name} ; Activate extruder\n`: '')}\
-${(config.firmware != 'klipper' && config.tool_index != 0 ? `T${config.tool_index} ; Activate extruder\n`: '')}\
+${(config.firmware != 'klipper' && config.firmware != 'ratos' && config.tool_index != 0 ? `T${config.tool_index} ; Activate extruder\n`: '')}\
 ${config.startGCode(true)}
+${(config.firmware == 'ratos' && config.tool_index != 0 ? `T${config.tool_index}\n`: '')}\
 G21 ; Millimeter units
 G90 ; Absolute XYZ
 M83 ; Relative E
@@ -829,7 +837,7 @@ M106 S${Math.round(config.fan_speed_firstlayer * 2.55)} ${(config.firmware.inclu
 `;
 
 if (config.acceleration_enable){
-  if (config.firmware === 'klipper') {
+  if (config.firmware === 'klipper' || config.firmware === 'ratos') {
     state.pa_script += `SET_VELOCITY_LIMIT ACCEL=${config.acceleration} ; Set printing acceleration\n`
   } else {
     state.pa_script += `M204 P${config.acceleration} ; Set printing acceleration\n`
@@ -844,7 +852,7 @@ if (config.acceleration_enable){
                     retract('+', basicSettings, {hop: false})
 
   // Set initial PA             
-  if (config.firmware == 'klipper'){
+  if (config.firmware == 'klipper' || config.firmware == 'ratos'){
     state.pa_script += `SET_PRESSURE_ADVANCE ${(config.paSmooth() ? `SMOOTH_TIME=` : `ADVANCE=`)}${Math.round10(config.pa_start, PA_round)} ${(config.extruderName() != '' ? `EXTRUDER=${config.extruderName()} ` : '')}; Set pressure advance to start value\n`;
     if (config.showLcd()){state.pa_script += `M117 PA ${Math.round10(config.pa_start, PA_round)}\n`}
   }
@@ -886,7 +894,7 @@ if (config.acceleration_enable){
     if (config.useLineNo()){
       if ((config.anchor_option != 'no_anchor' && i == 1) || (config.anchor_option == 'no_anchor' && i == 0)){
                  
-        if (config.firmware == 'klipper'){
+        if (config.firmware == 'klipper' || config.firmware == 'ratos'){
           state.pa_script += `SET_PRESSURE_ADVANCE ${(config.paSmooth() ? `SMOOTH_TIME=` : `ADVANCE=`)}${Math.round10(config.pa_start, PA_round)} ${(config.extruderName() != '' ? `EXTRUDER=${config.extruderName()} ` : '')}; Set pressure advance to start value for numbering\n`;
           if (config.showLcd()){state.pa_script += `M117 PA ${Math.round10(config.pa_start, PA_round)}\n`}
         }
@@ -932,7 +940,7 @@ if (config.acceleration_enable){
 
     for (let j = 0; j < config.numPatterns(); j++){
       // increment pressure advance
-      if (config.firmware == 'klipper'){
+      if (config.firmware == 'klipper' || config.firmware == 'ratos'){
         state.pa_script += `SET_PRESSURE_ADVANCE ${(config.paSmooth() ? `SMOOTH_TIME=` : `ADVANCE=`)}${Math.round10(config.pa_start + (j * config.pa_step), PA_round)} ${(config.extruderName() != '' ? `EXTRUDER=${config.extruderName()} ` : '')}; Set pressure advance\n`;
         if (config.showLcd()){state.pa_script += `M117 PA ${Math.round10(config.pa_start + (j * config.pa_step), PA_round)}\n`}
       }
@@ -975,7 +983,7 @@ if (config.acceleration_enable){
     }
   }
 
-  if (config.firmware == 'klipper'){
+  if (config.firmware == 'klipper' || config.firmware == 'ratos'){
     state.pa_script += `SET_PRESSURE_ADVANCE ${(config.paSmooth() ? `SMOOTH_TIME=` : `ADVANCE=`)}${Math.round10(config.pa_start, PA_round)} ${(config.extruderName() != '' ? `EXTRUDER=${config.extruderName()} ` : '')}; Set pressure advance back to start value\n`;
     if (config.showLcd()){state.pa_script += `M117 PA ${Math.round10(config.pa_start, PA_round)}\n`}
   }
@@ -1610,6 +1618,23 @@ Once you find a general range, run again with narrower range / finer increment.<
       $("label[for=PA_END]").html("PA End Value");
       $("label[for=PA_STEP]").html("PA Increment");
       break;
+    case firmware == "ratos":
+      if ($("#EXPERT_MODE").is(":checked")) {
+        $("label[for=TOOL_INDEX]").parent().show();
+        $("#TOOL_INDEX").parent().show();
+      }
+      $("label[for=EXTRUDER_NAME]").parent().hide();
+      $("#EXTRUDER_NAME").parent().hide();
+      $("#STEPPING_HEADER").html("Pressure Advance Stepping");
+      $("#STEPPING_HEADER_BODY").html(`\
+<i>Direct Drive: Start with ~0 to ~0.08 @ 0.005 increment<br>
+Bowden: Start with ~0 to ~1* @ 0.05 increment<br>
+<sup>*Long bowden paths can sometimes need higher than 1</sup><br></i>
+Once you find a general range, run again with narrower range / finer increment.<br>`);
+      $("label[for=PA_START]").html("PA Start Value");
+      $("label[for=PA_END]").html("PA End Value");
+      $("label[for=PA_STEP]").html("PA Increment");
+      break;
     case firmware == "marlin1_1_9":
       if ($("#EXPERT_MODE").is(":checked")) {
         $("label[for=TOOL_INDEX").parent().show();
@@ -1788,7 +1813,7 @@ function displayCalculatedValues(action = 'show'){
 <strong>Print size X: </strong> ${Math.round10(config.fitWidth(), -1)}mm<br>
 <strong>Print size Y: </strong> ${Math.round10(config.fitHeight(), -1)}mm<br>
 <strong>Pattern count: </strong> ${config.numPatterns()}<br>
-<strong>${(config.firmware === 'klipper' || config.firmware === 'rrf3') ? 'PA' : 'LA'} values: </strong>`
+<strong>${(config.firmware === 'klipper' || config.firmware === 'ratos' || config.firmware === 'rrf3') ? 'PA' : 'LA'} values: </strong>`
     for (let i = 0; i < config.numPatterns(); i++){
       body += `${Math.round10((config.pa_start + i * config.pa_step),PA_round)}`;
       if (i != config.numPatterns() - 1){ // add comma separator if not last item in list
@@ -1937,7 +1962,7 @@ function validate(updateRender = false) {
     if (!validationFail) {
       // only check if above checks pass
       // Check if PA smooth exceeds 0.2
-      if (config.firmware == 'klipper' && config.pa_smooth && config.pa_end > 0.2){
+      if ((config.firmware == 'klipper' || config.firmware == 'ratos') && config.pa_smooth && config.pa_end > 0.2){
           $("label[for=PA_END]").addClass("invalid");
           $("#warning1").text(
             "PA smooth cannot exceed 0.2."
