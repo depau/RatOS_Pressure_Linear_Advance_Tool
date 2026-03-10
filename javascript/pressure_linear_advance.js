@@ -42,11 +42,9 @@ const START_GCODES = {
     PRINT_START ; Start macro
     ; START_PRINT ; Start macro (alternate / official start macro name)
   `,
-  ratos: `
-    START_PRINT EXTRUDER_TEMP=[HOTEND_TEMP] EXTRUDER_OTHER_LAYER_TEMP=[HOTEND_TEMP] BED_TEMP=[BED_TEMP] TOTAL_LAYER_COUNT=[TOTAL_LAYER_COUNT] X0=[MIN_X] Y0=[MIN_Y] X1=[MAX_X] Y1=[MAX_Y]
-
-    ; For IDEX printers
-    ; START_PRINT EXTRUDER_TEMP=[HOTEND_TEMP],[HOTEND_TEMP] EXTRUDER_OTHER_LAYER_TEMP=[HOTEND_TEMP],[HOTEND_TEMP] BED_TEMP=[BED_TEMP] INITIAL_TOOL=[TOOL_INDEX] TOTAL_LAYER_COUNT=[TOTAL_LAYER_COUNT] X0=[MIN_X] Y0=[MIN_Y] X1=[MAX_X] Y1=[MAX_Y]
+  ratos: `START_PRINT EXTRUDER_TEMP=[HOTEND_TEMP] EXTRUDER_OTHER_LAYER_TEMP=[HOTEND_TEMP] BED_TEMP=[BED_TEMP] TOTAL_LAYER_COUNT=[TOTAL_LAYER_COUNT] X0=[MIN_X] Y0=[MIN_Y] X1=[MAX_X] Y1=[MAX_Y]
+  `,
+  ratos_idex: `START_PRINT EXTRUDER_TEMP=[HOTEND_TEMP],[HOTEND_TEMP] EXTRUDER_OTHER_LAYER_TEMP=[HOTEND_TEMP],[HOTEND_TEMP] BED_TEMP=[BED_TEMP] INITIAL_TOOL=[TOOL_INDEX] TOTAL_LAYER_COUNT=[TOTAL_LAYER_COUNT] X0=[MIN_X] Y0=[MIN_Y] X1=[MAX_X] Y1=[MAX_Y]
   `,
   rrf3: `
     G28                 ; Home all axes
@@ -142,6 +140,7 @@ const Settings = {
   zhop_enable: true,
   zhop_height: 0.1,
   spoof_prusa: "2.9.4",
+  idex_mode: false,
 
   applyLsSettings() {
     // Get localStorage data
@@ -261,6 +260,9 @@ const Settings = {
       case "START_GCODE":
         previewStartGcode();
         break;
+      case "IDEX_MODE":
+        toggleIdex();
+        break;
       default:
         break;
     }
@@ -268,9 +270,11 @@ const Settings = {
   },
 
   startGCode(replace = false) {
-    let gcode = this.start_gcode
-      ? this.start_gcode
-      : START_GCODES[this.firmware];
+    let gcodeKey = this.firmware;
+    if (this.firmware === 'ratos' && this.idex_mode) {
+      gcodeKey = 'ratos_idex';
+    }
+    let gcode = this.start_gcode ? this.start_gcode : START_GCODES[gcodeKey];
 
     // Dedent text block if needed
     gcode = gcode.replace(/^\n/, "");
@@ -324,12 +328,22 @@ const Settings = {
     }
 
     // Replace user variables/placeholders with real values
+    let toolIndex = this.toolIndex();
+    let hotendTemp = this.hotend_temp;
+
     return (
       gcode
-        .replace(/\[HOTEND_TEMP\]/g, this.hotend_temp)
+        .replace(/^START_PRINT.*?(\n|$)/gm, (match) => {
+          let startPrintMacro = `START_PRINT EXTRUDER_TEMP=${hotendTemp} EXTRUDER_OTHER_LAYER_TEMP=${hotendTemp} BED_TEMP=[BED_TEMP] TOTAL_LAYER_COUNT=[TOTAL_LAYER_COUNT] X0=[MIN_X] Y0=[MIN_Y] X1=[MAX_X] Y1=[MAX_Y]`;
+          if (this.firmware === 'ratos' && this.idex_mode) {
+            startPrintMacro = `START_PRINT EXTRUDER_TEMP=${hotendTemp},${hotendTemp} EXTRUDER_OTHER_LAYER_TEMP=${hotendTemp},${hotendTemp} BED_TEMP=[BED_TEMP] INITIAL_TOOL=${toolIndex} TOTAL_LAYER_COUNT=[TOTAL_LAYER_COUNT] X0=[MIN_X] Y0=[MIN_Y] X1=[MAX_X] Y1=[MAX_Y]`;
+          }
+          return startPrintMacro + "\n";
+        })
+        .replace(/\[HOTEND_TEMP\]/g, hotendTemp)
         .replace(/\[BED_TEMP\]/g, this.bed_temp)
         .replace(/\[EXTRUDER_NAME\]/g, this.extruder_name)
-        .replace(/\[TOOL_INDEX\]/g, this.tool_index)
+        .replace(/\[TOOL_INDEX\]/g, toolIndex)
         .replace(/\[MIN_X\]/g, this.bedX() / 2 - this.objectSizeX() / 2)
         .replace(/\[MIN_Y\]/g, this.bedY() / 2 - this.objectSizeY() / 2)
         .replace(/\[MAX_X\]/g, this.bedX() / 2 + this.objectSizeX() / 2)
@@ -459,11 +473,14 @@ const Settings = {
   },
 
   toolIndex() {
+    if (this.firmware === 'ratos' && this.idex_mode) {
+      return this.tool_index;
+    }
     if (!this.expert_mode) {
       return DEFAULT_SETTINGS.tool_index;
     }
 
-    return this.extruder_name_enable;
+    return this.tool_index;
   },
 
   lineRatio() {
@@ -846,9 +863,9 @@ state.pa_script += `\
 ; Prepare printing
 ;
 ${(config.firmware == 'klipper' && config.extruder_name !== '' && config.extruder_name_enable ? `ACTIVATE_EXTRUDER EXTRUDER=${config.extruder_name} ; Activate extruder\n`: '')}\
-${(config.firmware != 'klipper' && config.firmware != 'ratos' && config.tool_index != 0 ? `T${config.tool_index} ; Activate extruder\n`: '')}\
+${(config.firmware != 'klipper' && config.firmware != 'ratos' && config.toolIndex() != 0 ? `T${config.toolIndex()} ; Activate extruder\n`: '')}\
 ${config.startGCode(true)}
-${(config.firmware == 'ratos' && config.tool_index != 0 ? `T${config.tool_index}\n`: '')}\
+${(config.firmware == 'ratos' && config.toolIndex() != 0 ? `T${config.toolIndex()}\n`: '')}\
 G21 ; Millimeter units
 G90 ; Absolute XYZ
 M83 ; Relative E
@@ -856,7 +873,7 @@ G92 E0 ; Reset extruder distance
 ;
 ;  Begin printing
 ;
-M106 S${Math.round(config.fan_speed_firstlayer * 2.55)} ${(config.firmware.includes('marlin') && config.tool_index != 0 ? ` P${config.tool_index} ` : '')}; Set fan speed
+M106 S${Math.round(config.fan_speed_firstlayer * 2.55)} ${(config.firmware.includes('marlin') && config.toolIndex() != 0 ? ` P${config.toolIndex()} ` : '')}; Set fan speed
 `;
 
 if (config.acceleration_enable){
@@ -1595,6 +1612,7 @@ function toggleExpertMode() {
     $("#ECHO").parents().eq(1).show();
     toggleAnchorOptions();
     toggleFirmwareOptions();
+    toggleIdex();
   } else {
     $("#ORIGIN_CENTER").parents().eq(1).hide();
     $("label[for=FW_RETRACT]").parent().css({ opacity: 0 });
@@ -1614,6 +1632,7 @@ function toggleExpertMode() {
     $("label[for=ANCHOR_LAYER_LINE_RATIO]").parent().hide();
     $("#ANCHOR_LAYER_LINE_RATIO").parent().hide();
     $("#SPOOF_PRUSA").parents().eq(1).hide();
+    toggleIdex();
   }
 }
 
@@ -1668,12 +1687,10 @@ Once you find a general range, run again with narrower range / finer increment.<
       $("label[for=PA_START]").html("PA Start Value");
       $("label[for=PA_END]").html("PA End Value");
       $("label[for=PA_STEP]").html("PA Increment");
+      toggleIdex();
       break;
     case firmware == "marlin1_1_9":
-      if ($("#EXPERT_MODE").is(":checked")) {
-        $("label[for=TOOL_INDEX").parent().show();
-        $("#TOOL_INDEX").parent().show();
-      }
+      toggleIdex();
       $("label[for=EXTRUDER_NAME]").parent().hide();
       $("#EXTRUDER_NAME").parent().hide();
       $("#SPOOF_PRUSA").parents().eq(1).hide();
@@ -1690,10 +1707,7 @@ Once you find a general range, run again with narrower range / finer increment.<
       $("#PA_SMOOTH").parent().css({ opacity: 0 });
       break;
     case firmware == "marlin1_1_8":
-      if ($("#EXPERT_MODE").is(":checked")) {
-        $("label[for=TOOL_INDEX").parent().show();
-        $("#TOOL_INDEX").parent().show();
-      }
+      toggleIdex();
       $("label[for=EXTRUDER_NAME]").parent().hide();
       $("#EXTRUDER_NAME").parent().hide();
       $("label[for=START_GCODE_NO_HEATING]").parent().show();
@@ -1710,10 +1724,7 @@ Once you find a general range, run again with narrower range / finer increment.<
       $("#PA_SMOOTH").parent().css({ opacity: 0 });
       break;
     case firmware == "rrf3":
-      if ($("#EXPERT_MODE").is(":checked")) {
-        $("label[for=TOOL_INDEX").parent().show();
-        $("#TOOL_INDEX").parent().show();
-      }
+      toggleIdex();
       $("label[for=EXTRUDER_NAME]").parent().hide();
       $("#EXTRUDER_NAME").parent().hide();
       $("label[for=START_GCODE_NO_HEATING]").parent().show();
@@ -1732,6 +1743,7 @@ Once you find a general range, run again with narrower range / finer increment.<
       $("label[for=PA_STEP]").html("PA Increment");
       $("label[for=PA_SMOOTH]").parent().css({ opacity: 0 });
       $("#PA_SMOOTH").parent().css({ opacity: 0 });
+      toggleIdex();
       break;
   }
 }
@@ -1786,6 +1798,36 @@ function toggleAnchorOptions(){
       $('#ANCHOR_LAYER_LINE_RATIO').parent().hide();
       $('#anchorOptionDescription').html('<img style="width: auto; max-height: 150px;" src="./images/no_anchor.png" alt="No Anchor" />')
     }
+}
+
+function toggleIdex() {
+  let firmware = $("#FIRMWARE").val();
+  let idexMode = config.idex_mode;
+  let expertMode = $("#EXPERT_MODE").is(":checked");
+
+  if (firmware === "ratos") {
+    $("#idex_row").show();
+  } else {
+    $("#idex_row").hide();
+    if (idexMode) {
+      $("#IDEX_MODE").prop("checked", false);
+      config.idex_mode = false;
+      idexMode = false;
+    }
+  }
+
+  if (!expertMode) {
+    $("label[for=ORIGIN_CENTER]").parent().css({opacity: 0});
+    $("#ORIGIN_CENTER").parent().css({opacity: 0});
+  } else {
+    if ($('#BED_SHAPE').val() === 'Rect') {
+      $("label[for=ORIGIN_CENTER]").parent().css({opacity: 1});
+      $("#ORIGIN_CENTER").parent().css({opacity: 1});
+    }
+  }
+
+  // Update the start g-code textarea to reflect the new default
+  toggleSEGcode();
 }
 
 function toggleZHop() {

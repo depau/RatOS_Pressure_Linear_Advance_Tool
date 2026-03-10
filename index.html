@@ -151,6 +151,22 @@
                   <input type=number id="SPEED_TRAVEL" step=1 data-settings /> mm/s
                 </td>
               </tr>
+              <tr id="idex_row">
+                <td><label for="IDEX_MODE">Dual-extruder (IDEX)</label></td>
+                <td class=inputCell>
+                  <input type=checkbox id="IDEX_MODE" data-settings data-render />
+                </td>
+                <td><label for=TOOL_INDEX>Tool Index</label></td>
+                <td class=inputCell>
+                  <input type=number id="TOOL_INDEX" step=1 data-settings />
+                  <div class="hover-text">&#x1F6C8;
+                    <span class="tooltip-text">
+                      Usually 0 if only one extruder. Allows choosing extruder if more than one.<br><br>
+                      Emits <tt>T[TOOL_INDEX]</tt> if not set to 0.
+                    </span>
+                  </div>
+                </td>
+              </tr>
               <tr class="expert">
                 <td><label for=EXTRUDER_NAME class="expertLabel">Extruder Name</label> <input type=checkbox
                     id="EXTRUDER_NAME_ENABLE" data-settings /></td>
@@ -163,16 +179,6 @@
                       Enter the config section name of the desired extruder (e.g. "extruder2").<br><br>
                       Emits <tt>ACTIVATE_EXTRUDER EXTRUDER=[EXTRUDER_NAME]</tt> to g-code.<br><br>
                       Also appends <tt>EXTRUDER_NAME=[EXTRUDER_NAME]</tt> to pressure advance g-codes.
-                    </span>
-                  </div>
-                </td>
-                <td><label for=TOOL_INDEX class="expertLabel">Tool Index</label></th>
-                <td class=inputCell>
-                  <input type=number id="TOOL_INDEX" step=1 data-settings />
-                  <div class="hover-text">&#x1F6C8;
-                    <span class="tooltip-text">
-                      Usually 0 if only one extruder. Allows choosing extruder if more than one.<br><br>
-                      Emits <tt>T[TOOL_INDEX]</tt> if not set to 0.
                     </span>
                   </div>
                 </td>
