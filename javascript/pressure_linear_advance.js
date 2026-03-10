@@ -1601,8 +1601,6 @@ function toggleExtruderName() {
 function toggleExpertMode() {
   if ($("#EXPERT_MODE").is(":checked")) {
     $("#ORIGIN_CENTER").parents().eq(1).show();
-    $("label[for=FW_RETRACT]").parent().css({ opacity: 1 });
-    $("#FW_RETRACT").parent().css({ opacity: 1 });
     toggleFwRetract();
     $("#NUM_LAYERS").parents().eq(1).show();
     $("#LINE_RATIO").parents().eq(1).show();
@@ -1616,8 +1614,6 @@ function toggleExpertMode() {
     toggleIdex();
   } else {
     $("#ORIGIN_CENTER").parents().eq(1).hide();
-    $("label[for=FW_RETRACT]").parent().css({ opacity: 0 });
-    $("#FW_RETRACT").parent().css({ opacity: 0 });
     toggleFwRetract();
     $("#NUM_LAYERS").parents().eq(1).hide();
     $("#LINE_RATIO").parents().eq(1).hide();
@@ -1845,7 +1841,7 @@ function toggleZHop() {
     $('#ORIGIN_CENTER').parent().css({opacity: 0});
 
 function toggleFwRetract() {
-  if (!$('#FW_RETRACT').is(':checked') || !$('#EXPERT_MODE').is(':checked')) {
+  if (!$('#FW_RETRACT').is(':checked')) {
     $('label[for=SPEED_RETRACT]').parent().css({opacity: 1});
     $('#SPEED_RETRACT').css({opacity: 1});
     $('#SPEED_RETRACT').prop('disabled', false);

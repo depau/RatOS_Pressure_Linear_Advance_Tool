@@ -204,31 +204,7 @@
                 </td>
               </tr>
               <tr>
-                <td><label for=RETRACT_DIST>Retract Distance</label></td>
-                <td class=inputCell>
-                  <input type=number id="RETRACT_DIST" step=0.05 data-settings /> mm
-                </td>
-                <td><label for=ZHOP_ENABLE>Z Hop</label></td>
-                <td class=inputCell>
-                  <input type=checkbox id="ZHOP_ENABLE" checked data-settings />
-                </td>
-              </tr>
-              <tr>
-                <td><label for=SPEED_RETRACT>Retract Speed</label></td>
-                <td class=inputCell>
-                  <input type=number id="SPEED_RETRACT" step=1 data-settings /> mm/s
-                </td>
-                <td><label for=ZHOP_HEIGHT>Z Hop Height</label></td>
-                <td id="zhopHeightInputCell" class=inputCell>
-                  <input type=number id="ZHOP_HEIGHT" step=0.05 data-settings /> mm
-                </td>
-              </tr>
-              <tr>
-                <td><label for=SPEED_UNRETRACT>Unretract Speed</label></td>
-                <td class=inputCell colspan="1">
-                  <input type=number id="SPEED_UNRETRACT" step=1 data-settings /> mm/s
-                </td>
-                <td class="expert"><label for=FW_RETRACT class="expertLabel">Use Firmware Retraction</label></td>
+                <td><label for=FW_RETRACT>Use Firmware Retraction</label></td>
                 <td class="inputCell expert" colspan="1">
                   <input type=checkbox id="FW_RETRACT" data-settings />
                   <div class="hover-text">&#x1F6C8;
@@ -237,6 +213,31 @@
                       Uses <tt>G10</tt> / <tt>G11</tt> for retracts instead of directly commanding E moves.
                     </span>
                   </div>
+                </td>
+
+                <td><label for=RETRACT_DIST>Retract Distance</label></td>
+                <td class=inputCell>
+                  <input type=number id="RETRACT_DIST" step=0.05 data-settings /> mm
+                </td>
+              </tr>
+              <tr>
+                <td><label for=ZHOP_ENABLE>Z Hop</label></td>
+                <td class=inputCell>
+                  <input type=checkbox id="ZHOP_ENABLE" checked data-settings />
+                </td>
+                <td><label for=SPEED_RETRACT>Retract Speed</label></td>
+                <td class=inputCell>
+                  <input type=number id="SPEED_RETRACT" step=1 data-settings /> mm/s
+                </td>
+              </tr>
+              <tr>
+                <td><label for=ZHOP_HEIGHT>Z Hop Height</label></td>
+                <td id="zhopHeightInputCell" class=inputCell>
+                  <input type=number id="ZHOP_HEIGHT" step=0.05 data-settings /> mm
+                </td>
+                <td><label for=SPEED_UNRETRACT>Unretract Speed</label></td>
+                <td class=inputCell colspan="1">
+                  <input type=number id="SPEED_UNRETRACT" step=1 data-settings /> mm/s
                 </td>
               </tr>
               <tr>
