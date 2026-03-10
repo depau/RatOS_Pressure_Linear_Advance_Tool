@@ -108,7 +108,7 @@ const Settings = {
   filament: null,
   filament_diameter: 1.75,
   filename: "pa_pattern",
-  firmware: "klipper",
+  firmware: "ratos",
   fw_retract: false,
   height_firstlayer: 0.25,
   height_layer: 0.2,

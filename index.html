@@ -4,9 +4,9 @@
 <!--<link rel="shortcut icon" type="image/x-icon" href="../favicon.ico" />-->
 
 <head>
-  <title>Ellis' Pressure Advance / Linear Advance Calibration Tool</title>
+  <title>Depau's Pressure Advance / Linear Advance Calibration Tool</title>
   <meta charset="UTF-8">
-  <meta content="Ellis' Pressure Advance / Linear Advance Calibration Tool">
+  <meta content="Depau's Pressure Advance / Linear Advance Calibration Tool">
   <link rel="stylesheet" href="./stylesheets/main.css?v8" />
   <link rel="stylesheet" href="./stylesheets/font-awesome.min.css?v2" />
 </head>
@@ -20,17 +20,9 @@
   <div class="container" role="main">
     <div class="row">
       <div class="pageTitle" id="pageTitle">
-        <h1>Ellis' Pressure Advance / Linear Advance Calibration Tool</h1>
-        <sup>Original <a href="https://marlinfw.org/tools/lin_advance/k-factor.html">Marlin calibration tool</a> by <a
-            href="https://github.com/Sineos/k-factorjs">Sineos.</a>
-          Heavily modified/rewritten by <a href="https://github.com/AndrewEllis93">Andrew Ellis.</a></sup><br>
-        <sup>The old "lines" version of this tool has been <strong>deprecated.</strong> It's still available <a
-            href="https://ellis3dp.com/Pressure_Linear_Advance_Tool/lines_method_deprecated/">here</a>
-          if you prefer it.</i></sup><br><br>
-        For issues/bugs, contributions, and feature requests, please <a
-          href="https://github.com/AndrewEllis93/Pressure_Linear_Advance_Tool/issues">open a GitHub
-          issue.</a><br><br>
-
+        <h1>Depau's Pressure Advance / Linear Advance Calibration Tool</h1>
+        <sup>Original <a href="https://github.com/AndrewEllis93/Pressure_Linear_Advance_Tool">Pressure Advance / Linear
+            Advance Calibration Tool</a> by <a href="https://github.com/AndrewEllis93">Andrew Ellis.</a></sup><br>
       </div>
       <table id=gcodeTable>
         <tbody>
@@ -44,7 +36,7 @@
               <td class=gcodeTableLeftHeading>
                 <h4>3D Preview</h4> &nbsp;&nbsp;<a href="https://github.com/aligator/gcode-viewer">Source</a><br>
                 <i>Line widths are approximations only.</i><br><br><br><br>
-                <strong>See my</strong><br>
+                <strong>See Ellis's</strong><br>
                 <h5><u><a href="https://ellis3dp.com/Print-Tuning-Guide/">Print Tuning Guide</a></u></h5>
                 and
                 <h5><u><a
@@ -103,11 +95,11 @@
                 <td><label for="FIRMWARE">Firmware</td>
                 <td class=inputCell>
                   <select id="FIRMWARE" data-settings data-render>
+                    <option value="ratos">RatOS</option>
                     <option value="klipper">Klipper</option>
                     <option value="marlin1_1_9">Marlin 1.1.9+</option>
                     <option value="marlin1_1_8">Marlin 1.1.8 & Older</option>
                     <option value="rrf3">RepRapFirmware 3+</option>
-                    <option value="ratos">RatOS</option>
                   </select>
                   <p id="KFACTOR_DESRIPTION"></p>
                 </td>
@@ -149,7 +141,8 @@
                     <span class="tooltip-text">
                       A rough guess is fine if you haven't tuned this yet.<br><br>
                       Overextruding the test is a bit better than underextruding it.<br><br>
-                      This tool uses Prusa Slicer / SuperSlicer / OrcaSlicer flow math. Values from Cura may differ slightly.
+                      This tool uses Prusa Slicer / SuperSlicer / OrcaSlicer flow math. Values from Cura may differ
+                      slightly.
                     </span>
                   </div>
                 </td>
@@ -548,7 +541,8 @@
                     <input type=text id="SPOOF_PRUSA" data-settings />
                     <div class="hover-text">&#x1F6C8;
                       <span class="tooltip-text">
-                        Enter a Prusa Slicer version number here if you're using RatOS and it's complaining that your slicer is not supported.
+                        Enter a Prusa Slicer version number here if you're using RatOS and it's complaining that your
+                        slicer is not supported.
                         Leave empty to disable.
                       </span>
                     </div>
@@ -562,7 +556,8 @@
                     </p>
                     <p>
                     <ul>
-                      <li>With <strong>Cura / Prusa Slicer / SuperSlicer / OrcaSlicer</strong>, you should <i>generally</i> be able
+                      <li>With <strong>Cura / Prusa Slicer / SuperSlicer / OrcaSlicer</strong>, you should
+                        <i>generally</i> be able
                         to
                         copy your start g-code from your slicer directly.</li>
                       <li>With <strong>other slicers</strong>, you should also just be able to copy/paste, UNLESS you
