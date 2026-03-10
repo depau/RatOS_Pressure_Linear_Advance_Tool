@@ -107,7 +107,7 @@ const Settings = {
   filament_diameter: 1.75,
   filename: "pa_pattern",
   firmware: "ratos",
-  fw_retract: false,
+  fw_retract: true,
   height_firstlayer: 0.25,
   height_layer: 0.2,
   hotend_temp: 200,
