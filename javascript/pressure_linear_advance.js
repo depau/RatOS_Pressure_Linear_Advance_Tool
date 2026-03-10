@@ -141,7 +141,7 @@ const Settings = {
   wall_side_length: 30.0,
   zhop_enable: true,
   zhop_height: 0.1,
-  spoof_prusa: "2.9.0",
+  spoof_prusa: "2.9.4",
 
   applyLsSettings() {
     // Get localStorage data
